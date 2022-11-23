@@ -5,8 +5,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :omniauthable, omniauth_providers: [:facebook, :google_oauth2]
-
-  scope :all_expect, ->(user) { where.not(id: user) }
+  has_many :messages
+  scope :all_except, ->(user) { where.not(id: user) }
+  after_create_commit { broadcast_append_to "users"}
 
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
